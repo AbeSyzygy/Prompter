@@ -1,0 +1,11 @@
+Pentatonic
+Scale
+Chord Tones
+Chromatic:0
+I:2
+ii:3
+iii:3
+IV:3
+V:2
+vi
+vii':2
