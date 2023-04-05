@@ -4,6 +4,15 @@ import time
 import select
 import platform
 
+if platform.system() == 'Windows':
+    import msvcrt
+else:
+    import select
+    import termios
+    import tty
+
+print(f"Configuring for {platform.system()}\n")
+
 # ////////////////////////////
 # To Do : Refactor the .txt file-parsing code into a singer parse function.
 # ////////////////////////////
@@ -13,7 +22,6 @@ file_path = "prompts.txt"
 with open(file_path, "r") as f:
     sentences = f.readlines()
 
-# Remove leading and trailing whitespace characters from the string
 sentences = [s.strip() for s in sentences]
 
 weight_idx = []
@@ -36,8 +44,9 @@ for i, s in enumerate(sentences):
 interval = int(input("Enter the interval time in seconds: "))
 next_run = time.monotonic()
 
-old_settings = termios.tcgetattr(sys.stdin)
-tty.setcbreak(sys.stdin.fileno())
+if platform.system() != 'Windows':
+    old_settings = termios.tcgetattr(sys.stdin)
+    tty.setcbreak(sys.stdin.fileno())
 # Puts the terminal into "cbreak" mode:
 # input characters are delivered to the program as soon as they're entered,
 # rather than being buffered and delivered in batches.
@@ -47,11 +56,19 @@ tty.setcbreak(sys.stdin.fileno())
 last_choice = None
 running = True
 while running:
-    if select.select([sys.stdin], [], [], 0) == ([sys.stdin], [], []):
-        input_char = sys.stdin.read(1)
-        if input_char == 'q':
-            running = False
-            print("Exiting program...")
+    if platform.system() == 'Windows':
+        if msvcrt.kbhit():
+            input_char = msvcrt.getch().decode('utf-8')
+            if input_char == 'q':
+                running = False
+                print("Exiting program...")
+
+    else:
+        if select.select([sys.stdin], [], [], 0) == ([sys.stdin], [], []):
+            input_char = sys.stdin.read(1)
+            if input_char == 'q':
+                running = False
+                print("Exiting program...")
 
     if time.monotonic() >= next_run:
         this_choice = random.choice(sentences_weighted)
@@ -68,4 +85,5 @@ while running:
 
     time.sleep(0.01)
 
-termios.tcsetattr(sys.stdin, termios.TCSADRAIN, old_settings)
+if platform.system() == 'Windows':
+    termios.tcsetattr(sys.stdin, termios.TCSADRAIN, old_settings)
