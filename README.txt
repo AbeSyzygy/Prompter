@@ -3,7 +3,7 @@ Prompts in the 'prompts.txt' file are separated by new line, and weight with the
 	prompt:[weight]
 
 If no weight is specified, weighting defaults to 1.
-A weight of zero eliminates the prompt from the set a runtim.
+A weight of zero eliminates the prompt from the set a runtime.
 
 ////////////////////////////////////
 
